@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const validator = require("validator");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const Task = require("./task");
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -52,7 +53,7 @@ const userSchema = new mongoose.Schema({
   ],
 });
 
-// state the relation between user and task in virtual
+// state the relationship between user and task in virtual
 // will not store in db
 userSchema.virtual("tasks", {
   ref: "Task",
@@ -101,6 +102,14 @@ userSchema.pre("save", async function (next) {
     user.password = await bcrypt.hash(user.password, 8);
   }
 
+  next();
+});
+
+// mongoose middleware
+//delete user's task when user is deleted
+userSchema.pre("remove", async function (next) {
+  const user = this;
+  await Task.deleteMany({ owner: user._id });
   next();
 });
 

@@ -55,7 +55,7 @@ router.get("/tasks/:id", auth, async (req, res) => {
   }
 });
 
-router.patch("/tasks/:id", async (req, res) => {
+router.patch("/tasks/:id", auth, async (req, res) => {
   const updates = Object.keys(req.body);
   const allowUpdates = ["description", "completed"];
   const isValidOperation = allowUpdates.every((item) => updates.includes(item));
@@ -65,7 +65,15 @@ router.patch("/tasks/:id", async (req, res) => {
   }
 
   try {
-    const task = await Task.findById(req.params.id);
+    const task = await Task.findOne({
+      _id: req.params.id,
+      owner: req.user._id,
+    });
+
+    if (!task) {
+      return res.status(404).json({ success: true, task: "Not Found" });
+    }
+
     updates.forEach((update) => (task[update] = req.body[update]));
     await task.save();
     // const task = await Task.findByIdAndUpdate(req.params.id, req.body, {
@@ -73,19 +81,16 @@ router.patch("/tasks/:id", async (req, res) => {
     //   runValidators: true,
     // });
 
-    if (!task) {
-      return res.status(404).json({ success: true, task: "Not Found" });
-    }
     res.status(200).json({ success: true, task: task });
   } catch (err) {
     res.status(400).json({ success: false, error: err.message });
   }
 });
 
-router.delete("/tasks/:id", async (req, res) => {
+router.delete("/tasks/:id", auth, async (req, res) => {
   const _id = req.params.id;
   try {
-    const task = await Task.findByIdAndDelete(_id);
+    const task = await Task.findOneAndDelete({ _id: _id, owner: req.user._id });
 
     if (!task) {
       return res.status(404).json({ success: true, task: "Not Found" });
