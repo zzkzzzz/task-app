@@ -27,20 +27,43 @@ router.post("/tasks", auth, async (req, res) => {
 });
 
 // get all tasks of the user
+// Filter Data
+// GET  /tasks?completed = boolean
+// Paginating Data
+// GET  /tasks?limit=10&skip=0
+// Sorting Data
+// GET  /tasks?sortBy=createdAt:asc
+// GET  /tasks?sortBy=completed:desc
+
 router.get("/tasks", auth, async (req, res) => {
+  const match = {};
+  const sort = {};
+
+  if (req.query.completed) {
+    match.completed = req.query.completed === "true";
+  }
+
+  if (req.query.sortBy) {
+    const parts = req.query.sortBy.split(":");
+    sort[parts[0]] = parts[1] === "desc" ? -1 : 1;
+  }
   try {
-    const tasks = await Task.find({ owner: req.user._id });
-    res.status(200).json({ success: true, tasks: tasks });
+    await req.user
+      .populate({
+        path: "tasks",
+        match,
+        options: {
+          limit: parseInt(req.query.limit),
+          skip: parseInt(req.query.skip),
+          sort,
+        },
+      })
+      .execPopulate();
+    //const tasks = await Task.find({ owner: req.user._id });
+    res.status(200).json({ success: true, tasks: req.user.tasks });
   } catch (err) {
     res.status(400).json({ success: false, error: err.message });
   }
-  // Task.find({})
-  //   .then((tasks) => {
-  //     res.status(200).json({ success: true, tasks: tasks });
-  //   })
-  //   .catch((err) => {
-  //     res.status(400).json({ success: false, error: err.message });
-  //   });
 });
 
 // get the task by _id and the user._id
