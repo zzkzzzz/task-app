@@ -126,13 +126,6 @@ router.patch("/users/me", auth, async (req, res) => {
 //delete user's own profile
 router.delete("/users/me", auth, async (req, res) => {
   try {
-    //const _id = req.user._id;
-    // const user = await User.findByIdAndDelete(_id);
-
-    // if (!user) {
-    //   return res.status(404).json({ success: true, user: "Not Found" });
-    // }
-
     await req.user.remove();
     res.status(200).json({ success: true, user: req.user });
   } catch (err) {
@@ -140,17 +133,53 @@ router.delete("/users/me", auth, async (req, res) => {
   }
 });
 
+// upload file
 const upload = multer({
-  dest: "avatars",
+  // will save in local memory file "avatars"
+  //dest: "avatars",
+  limits: {
+    fileSize: 1000000,
+  },
+  //valiate file type
+  fileFilter(req, file, cb) {
+    if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
+      // pass an error if something goes wrong:
+      return cb(new Error("Invalid file type"));
+    }
+
+    // To accept the file pass `true`
+    cb(null, true);
+  },
 });
 
+// create avatar
 router.post(
   "/users/me/avatar",
   auth,
   upload.single("avatar"),
   async (req, res) => {
-    res.send("success");
+    try {
+      req.user.avatar = req.file.buffer;
+      await req.user.save();
+      res.status(200).json({ success: true, user: req.user });
+    } catch (err) {
+      res.status(400).json({ success: false, error: err.message });
+    }
+  },
+  //handle express erroe
+  (error, req, res, next) => {
+    res.status(400).json({ success: false, error: error.message });
   }
 );
 
+// delete user's avatar
+router.delete("/users/me/avatar", auth, async (req, res) => {
+  try {
+    req.user.avatar = undefined;
+    await req.user.save();
+    res.status(200).json({ success: true, user: req.user });
+  } catch (err) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
 module.exports = router;
