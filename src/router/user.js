@@ -161,7 +161,7 @@ router.post(
     try {
       req.user.avatar = req.file.buffer;
       await req.user.save();
-      res.status(200).json({ success: true, user: req.user });
+      res.status(200).json({ success: true });
     } catch (err) {
       res.status(400).json({ success: false, error: err.message });
     }
@@ -182,4 +182,21 @@ router.delete("/users/me/avatar", auth, async (req, res) => {
     res.status(400).json({ success: false, error: err.message });
   }
 });
+
+// fetch user's avatar image
+router.get("/users/:id/avatar", async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+
+    if (!user.avatar || !user) {
+      throw new Error("User or avatar not found");
+    }
+
+    res.set("Content-Type", "image/jpg");
+    res.send(user.avatar);
+  } catch (err) {
+    res.status(404).json({ success: false, error: err.message });
+  }
+});
+
 module.exports = router;
