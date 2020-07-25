@@ -3,6 +3,7 @@ const router = new express.Router();
 const auth = require("../middleware/auth");
 const User = require("../models/user");
 const multer = require("multer");
+const sharp = require("sharp");
 
 //create new user
 router.post("/users", async (req, res) => {
@@ -159,7 +160,12 @@ router.post(
   upload.single("avatar"),
   async (req, res) => {
     try {
-      req.user.avatar = req.file.buffer;
+      // use sharp to crop and format the image
+      const buffer = await sharp(req.file.buffer)
+        .resize({ width: 250, height: 250 })
+        .png()
+        .toBuffer();
+      req.user.avatar = buffer;
       await req.user.save();
       res.status(200).json({ success: true });
     } catch (err) {
@@ -192,7 +198,7 @@ router.get("/users/:id/avatar", async (req, res) => {
       throw new Error("User or avatar not found");
     }
 
-    res.set("Content-Type", "image/jpg");
+    res.set("Content-Type", "image/png");
     res.send(user.avatar);
   } catch (err) {
     res.status(404).json({ success: false, error: err.message });

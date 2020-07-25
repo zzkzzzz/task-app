@@ -78,11 +78,13 @@ userSchema.methods.generateAuthToken = async function () {
   return token;
 };
 
+// remove unnecessary info in user response
 userSchema.methods.toJSON = function () {
   const user = this;
   const userObject = user.toObject();
   delete userObject.password;
   delete userObject.tokens;
+  delete userObject.avatar;
   return userObject;
 };
 
