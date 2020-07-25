@@ -2,6 +2,7 @@ const express = require("express");
 const router = new express.Router();
 const auth = require("../middleware/auth");
 const User = require("../models/user");
+const multer = require("multer");
 
 //create new user
 router.post("/users", async (req, res) => {
@@ -138,5 +139,18 @@ router.delete("/users/me", auth, async (req, res) => {
     res.status(400).json({ success: false, error: err.message });
   }
 });
+
+const upload = multer({
+  dest: "avatars",
+});
+
+router.post(
+  "/users/me/avatar",
+  auth,
+  upload.single("avatar"),
+  async (req, res) => {
+    res.send("success");
+  }
+);
 
 module.exports = router;
