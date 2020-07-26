@@ -5,3 +5,5 @@ To learn
 - MongoDB and mongoose
 - Promises and AsyncAwait
 - REST API
+- JWT Authentication
+- File Upload
