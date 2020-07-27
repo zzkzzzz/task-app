@@ -190,6 +190,8 @@ router.delete("/users/me/avatar", auth, async (req, res) => {
 });
 
 // fetch user's avatar image
+// localhost:3000/users/5f1d55fc9c67de0017c6702b/avatar
+// https://zzk-task-manager.herokuapp.com/users/5f1d55fc9c67de0017c6702b/avatar
 router.get("/users/:id/avatar", async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
