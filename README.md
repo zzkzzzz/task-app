@@ -7,3 +7,4 @@ To learn
 - REST API
 - JWT Authentication
 - File Upload
+- Test (Jest and Supertest)
