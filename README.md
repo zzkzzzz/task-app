@@ -1,5 +1,5 @@
 # Task-app
-This is a nodejs practice project
+This is a nodejs practice project to implement a to-do list
 
 To learn 
 - MongoDB and mongoose
