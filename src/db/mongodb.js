@@ -1,4 +1,4 @@
-///Users/zhengzikang/mongodb/bin/mongod --dbpath=/Users/zhengzikang/mongodb-data
+
 
 //CURD create read update delete
 
